@@ -1,4 +1,3 @@
-#setwd("C:/Users/qlatif/Desktop/JuliaBeetle_Chap4") # Change to environment
 setwd("F:/research stuff/FS_PostDoc/outside_consult/JuliaBeetle_Chap4") # Change to environment
 
 ## Load and clean data ##
@@ -55,7 +54,7 @@ occassionID <- paste(Detection.data$plot,"_",Detection.data$year,"_",Detection.d
 max(tapply(occassionID,occassionID,length)) # Maximum number of individuals per visit
 hist(tapply(occassionID,occassionID,length))
 
-##---Compile detection data array (N-mixture model - 2 levels)---##
+##---Compile detection data array (N-mixture model - 2 levels; can be collapsed for simpler models)---##
 
 year <- sort(unique(Detection.data$year))
 n.visits <- c(1,3,3,3) # 1 visit in 2013, then 3 visits in each other year
@@ -65,12 +64,13 @@ for(j in 1:dim(Y.arry)[1]) for(t in 1:dim(Y.arry)[2]) for(v in 1:dim(Y.arry)[3])
                                 Detection.data$survey_round==v),]
   if(nrow(obs)>0) Y.arry[j,t,v] <- nrow(obs)
   }
-Y.arry[which(is.element(substr(plot,1,2),c("1a","2a","1b","2b"))),1,] <- NA # Remove 2013 for sites 1 and 2
+Y.arry[which(is.element(substr(plot,1,2),c("1a","2a","1b","2b"))),1,] <- NA # Sites 1 and 2 not surveyed in 2013.
 Y.arry[,1,2:3] <- NA # Remove repeat visits from 2013
 
 ##---Compile plot-level covariate matrix---##
 Plot.data <- read.csv("PlotLevel_Data.csv",header=T,stringsAsFactors=F)
 sort(unique(Plot.data$plot),na.last=T)
+Plot.data <- Plot.data[order(Plot.data$plot),] # Order plots to match detection data.
 
 Plot.data$treat_cont[which(Plot.data$treat_cont=="t ")] <- "t"
 unique(Plot.data$treat_cont)
