@@ -1,3 +1,4 @@
+#setwd("C:/Users/qlatif/Desktop/JuliaBeetle_Chap4") # Change to environment
 setwd("F:/research stuff/FS_PostDoc/outside_consult/JuliaBeetle_Chap4") # Change to environment
 
 ## Load and clean data ##
@@ -54,7 +55,7 @@ occassionID <- paste(Detection.data$plot,"_",Detection.data$year,"_",Detection.d
 max(tapply(occassionID,occassionID,length)) # Maximum number of individuals per visit
 hist(tapply(occassionID,occassionID,length))
 
-##---Compile detection data array (N-mixture model - 2 levels; can be collapsed for simpler models)---##
+##---Compile detection data array (N-mixture model - 2 levels)---##
 
 year <- sort(unique(Detection.data$year))
 n.visits <- c(1,3,3,3) # 1 visit in 2013, then 3 visits in each other year
