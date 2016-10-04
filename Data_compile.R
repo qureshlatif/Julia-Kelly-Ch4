@@ -139,8 +139,8 @@ Tree.data$status[which(Tree.data$status=="r")] <- "br"
 Tree.data$status[which(Tree.data$status=="w")] <- "tw"
 Tree.data <- # Remove this one tree because not found in raw data
   Tree.data[-which(Tree.data$plot=="1a5"&Tree.data$species=="abla"&Tree.data$tree_dbh==13),]
-Tree.data$status[which(is.element(Tree.data$status,c("sn","de")))] <- "snag"
-Tree.data$status[which(is.element(Tree.data$status,c("br","nd","tw")))] <- "mid Inf"
+Tree.data$status[which(is.element(Tree.data$status,c("br","sn","de")))] <- "snag"
+Tree.data$status[which(is.element(Tree.data$status,c("nd","tw")))] <- "mid Inf"
 Tree.data$status[which(is.element(Tree.data$status,c("gr","ye")))] <- "early Inf"
 Tree.data$status[which(Tree.data$status=="li")] <- "healthy"
 sort(unique(Tree.data$status),na.last=T)
@@ -159,28 +159,36 @@ Tree.data$dbh[which(Tree.data$plot=="4a6"&is.na(Tree.data$dbh))] <- mn
 rm(mn)
 
   # Compile tree summary values into Plot-level table #
-Plot.data$QMD <- Plot.data$snag <-
+Plot.data$QMD_2014 <- Plot.data$QMD_2015 <- Plot.data$QMD_2016 <-
   Plot.data$EarlInf_2016 <- Plot.data$EarlInf_2015 <- Plot.data$EarlInf_2014 <- 
   Plot.data$MidInf_2016 <- Plot.data$MidInf_2015 <- Plot.data$MidInf_2014 <- 0
+  Plot.data$snag_2016 <- Plot.data$snag_2015 <- Plot.data$snag_2014 <- 0
 for(i in 1:nrow(Plot.data)) {
   obs2014 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2014&Tree.data$core_outsideplot!="y"),]
   obs2015 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2015&Tree.data$core_outsideplot!="y"),]
   obs2016 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2016&Tree.data$core_outsideplot!="y"),]
-  Plot.data$QMD[i] <- mean(obs2014$dbh[obs2014$type!="stump"]^2,na.rm=T)
-  Plot.data$snag[i] <- sum(obs2014$status=="snag"&obs2014$dbh>=23)
   Plot.data$EarlInf_2014[i] <- sum(obs2014$status=="early Inf")
   Plot.data$EarlInf_2015[i] <- sum(obs2015$status=="early Inf")
   Plot.data$EarlInf_2016[i] <- sum(obs2016$status=="early Inf")
   Plot.data$MidInf_2014[i] <- sum(obs2014$status=="mid Inf")
   Plot.data$MidInf_2015[i] <- sum(obs2015$status=="mid Inf")
   Plot.data$MidInf_2016[i] <- sum(obs2016$status=="mid Inf")
+  Plot.data$snag_2014[i] <- sum(obs2014$status=="snag")
+  Plot.data$snag_2015[i] <- sum(obs2015$status=="snag")
+  Plot.data$snag_2016[i] <- sum(obs2016$status=="snag")
+  Plot.data$QMD_2014[i] <- mean(obs2014$dbh[which(obs2014$type!="stump"&obs2014$status!="mid Inf"&
+                                                    obs2014$status!="snag")]^2,na.rm=T)
+  Plot.data$QMD_2015[i] <- mean(obs2015$dbh[which(obs2015$type!="stump"&obs2015$status!="mid Inf"&
+                                                    obs2015$status!="snag")]^2,na.rm=T)
+  Plot.data$QMD_2016[i] <- mean(obs2016$dbh[which(obs2016$type!="stump"&obs2016$status!="mid Inf"&
+                                                    obs2016$status!="snag")]^2,na.rm=T)
 }
 
 #cor(rbind(as.matrix(Plot.data[,c("QMD","snag","EarlInf_2014","MidInf_2014")]), # Inspect correlation plot if desired.
 #          as.matrix(Plot.data[,c("QMD","snag","EarlInf_2015","MidInf_2015")]),make.row.names = F))
 
 # Variance inflation factors #
-vars <- c("QMD","EarlInf_2015","MidInf_2015","snag")
+vars <- c("QMD_2015","EarlInf_2015","MidInf_2015","snag_2015")
 VIFs <- matrix(NA,nrow=length(vars),ncol=1,dimnames=list(vars,"VIF"))
 for(i in 1:length(vars)) {
   m <- lm(as.formula(paste(vars[i],"~",paste(vars[-i],collapse="+",sep=""),sep="")),data=Plot.data)
