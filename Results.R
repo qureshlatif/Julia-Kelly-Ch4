@@ -51,8 +51,10 @@ nyear <- length(year)
 Z.init <- apply(Y,c(1,2),function(x) sum(x>0)) # Initial values for occupancy state parameter.
 
 mod <- loadObject("Mod_Pers_EInfMInfSnagQMD")
-
 write.csv(mod$BUGSoutput$summary,"Model_summary.csv") # Export summary of model parameters and output.
+
+#mod <- loadObject("Mod_Pers_EInfMInfSnagQMD_noClrCut")
+#write.csv(mod$BUGSoutput$summary,"Model_summary_noClrCut.csv") # Export summary of model parameters and output.
 
 ##### Plot modeled occupancy relationships #####
 library(ggplot2)
