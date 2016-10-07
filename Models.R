@@ -43,12 +43,14 @@ Y <- # Collapse further to represent the number of visits when species detected 
   apply(Y,c(1,2),function(x) sum(x,na.rm=T))
 Y[which(is.element(substr(plot,1,2),c("1a","2a","1b","2b"))),1] <- NA # Sites 1 and 2 not surveyed in 2013.
 
+# Remove observations for pointxyear occassions following clear-cut (optional) #
+#Y[which(is.element(substr(plot,1,2),c("1a7","1a8","1a9"))),c(3,4)] <- NA
+#Y[which(plot=="2a5"),4] <- NA
+
 nplot <- length(plot)
 nyear <- length(year)
 
 Z.init <- apply(Y,c(1,2),function(x) sum(x>0)) # Initial values for occupancy state parameter.
-
-
 
 #--- Occupancy model with persistence parameter (save finite-sample estimates for plotting)---#
 
@@ -79,6 +81,20 @@ EarlInf0[ind,"2013"] <- EarlInf.low[ind,"2013"] <- EarlInf.high[ind,"2013"] <- M
   MidInf.mod[ind,"2013"] <- MidInf.high[ind,"2013"] <- snag.low[ind,"2013"] <- snag.mod[ind,"2013"] <-
   snag.high[ind,"2013"] <- QMD.low[ind,"2013"] <- QMD.mod[ind,"2013"] <- QMD.high[ind,"2013"] <- 0
 rm(ind)
+
+  # Remove values for clear-cut pointXyear occassions #
+#ind <- which(is.element(substr(plot,1,2),c("1a7","1a8","1a9")))
+#EarlInf0[ind,c("2015","2016")] <- EarlInf.low[ind,c("2015","2016")] <- EarlInf.high[ind,c("2015","2016")] <-
+#  MidInf.low[ind,c("2015","2016")] <- MidInf.mod[ind,c("2015","2016")] <- MidInf.high[ind,c("2015","2016")] <-
+#  snag.low[ind,c("2015","2016")] <- snag.mod[ind,c("2015","2016")] <- snag.high[ind,c("2015","2016")] <-
+#  QMD.low[ind,c("2015","2016")] <- QMD.mod[ind,c("2015","2016")] <- QMD.high[ind,c("2015","2016")] <- 0
+
+#ind <- which(plot=="2a5")
+#EarlInf0[ind,"2016"] <- EarlInf.low[ind,"2016"] <- EarlInf.high[ind,"2016"] <-
+#  MidInf.low[ind,"2016"] <- MidInf.mod[ind,"2016"] <- MidInf.high[ind,"2016"] <-
+#  snag.low[ind,"2016"] <- snag.mod[ind,"2016"] <- snag.high[ind,"2016"] <-
+#  QMD.low[ind,"2016"] <- QMD.mod[ind,"2016"] <- QMD.high[ind,"2016"] <- 0
+#rm(ind)
 
 # Assemble the data names list for JAGS #
 data <- list("Y","nplot","nyear","n.visits","EarlInf.z","MidInf.z","snag.z","QMD.z","EarlInf0","EarlInf.low","EarlInf.high",
@@ -223,3 +239,4 @@ runtime  # Total time it took to run model.
 #save results
 library(R.utils)
 saveObject(bugout,"Mod_Pers_EInfMInfSnagQMD")
+#saveObject(bugout,"Mod_Pers_EInfMInfSnagQMD_noClrCut")
