@@ -51,6 +51,7 @@ nyear <- length(year)
 Z.init <- apply(Y,c(1,2),function(x) sum(x>0)) # Initial values for occupancy state parameter.
 
 mod <- loadObject("Mod_Pers_EInfMInfSnagQMD")
+#mod <- loadObject("Mod_Pers_EInfMInfSnagQMD_PriorTrunc")
 write.csv(mod$BUGSoutput$summary,"Model_summary.csv") # Export summary of model parameters and output.
 
 #mod <- loadObject("Mod_Pers_EInfMInfSnagQMD_noClrCut")
@@ -63,11 +64,11 @@ expit <- function(x) exp(x)/(1+exp(x))
 
 # Early infestation #
   # finite-sample estimates #
-X <- c(0,3.08,21.08) # mean values for finite-sample bins
-psi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,median)
-psi.lo <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.025,type=8))
-psi.hi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.975,type=8))
-dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+#X <- c(0,3.08,21.08) # mean values for finite-sample bins
+#psi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,median)
+#psi.lo <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.025,type=8))
+#psi.hi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.975,type=8))
+#dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
 
 X <- seq(min(EarlInf.x),max(EarlInf.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
@@ -89,8 +90,8 @@ pEI <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   geom_line(size=1,linetype="solid") +
   geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
   geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
-  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
+#  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
+#  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
   ylab(NULL) + xlab("Number Early Infested Trees") +
   scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
   theme(axis.title.x=element_text(size=30)) +
@@ -101,11 +102,11 @@ pEI <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
 
 # Mid infestation #
   # finite-sample estimates #
-X <- c(0.29,3.13,14.19) # mean values for finite-sample bins
-psi <- apply(mod$BUGSoutput$sims.list$psi.MI,2,median)
-psi.lo <- apply(mod$BUGSoutput$sims.list$psi.MI,2,function(x) quantile(x,prob=0.025,type=8))
-psi.hi <- apply(mod$BUGSoutput$sims.list$psi.MI,2,function(x) quantile(x,prob=0.975,type=8))
-dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+#X <- c(0.29,3.13,14.19) # mean values for finite-sample bins
+#psi <- apply(mod$BUGSoutput$sims.list$psi.MI,2,median)
+#psi.lo <- apply(mod$BUGSoutput$sims.list$psi.MI,2,function(x) quantile(x,prob=0.025,type=8))
+#psi.hi <- apply(mod$BUGSoutput$sims.list$psi.MI,2,function(x) quantile(x,prob=0.975,type=8))
+#dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
 
 X <- seq(min(MidInf.x),max(MidInf.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
@@ -127,8 +128,8 @@ pMI <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   geom_line(size=1,linetype="solid") +
   geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
   geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
-  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
+#  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
+#  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
   ylab(NULL) + xlab("Number Mid-infested Trees") +
   scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
   theme(axis.title.x=element_text(size=30)) +
@@ -139,11 +140,11 @@ pMI <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
 
 # Snags #
   # finite-sample estimates #
-X <- c(0.61,2.68,9.77) # mean values for finite-sample bins
-psi <- apply(mod$BUGSoutput$sims.list$psi.snag,2,median)
-psi.lo <- apply(mod$BUGSoutput$sims.list$psi.snag,2,function(x) quantile(x,prob=0.025,type=8))
-psi.hi <- apply(mod$BUGSoutput$sims.list$psi.snag,2,function(x) quantile(x,prob=0.975,type=8))
-dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+#X <- c(0.61,2.68,9.77) # mean values for finite-sample bins
+#psi <- apply(mod$BUGSoutput$sims.list$psi.snag,2,median)
+#psi.lo <- apply(mod$BUGSoutput$sims.list$psi.snag,2,function(x) quantile(x,prob=0.025,type=8))
+#psi.hi <- apply(mod$BUGSoutput$sims.list$psi.snag,2,function(x) quantile(x,prob=0.975,type=8))
+#dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
 
 X <- seq(min(snag.x),max(snag.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
@@ -165,8 +166,8 @@ pSnag <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   geom_line(size=1,linetype="solid") +
   geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
   geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
-  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
+#  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
+#  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
   ylab(NULL) + xlab("Number of Snags") +
   scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
   theme(axis.title.x=element_text(size=30)) +
@@ -177,11 +178,11 @@ pSnag <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
 
 # QMD #
   # finite-sample estimates #
-X <- c(305,633,1136) # mean values for finite-sample bins
-psi <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,median)
-psi.lo <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,function(x) quantile(x,prob=0.025,type=8))
-psi.hi <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,function(x) quantile(x,prob=0.975,type=8))
-dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+#X <- c(305,633,1136) # mean values for finite-sample bins
+#psi <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,median)
+#psi.lo <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,function(x) quantile(x,prob=0.025,type=8))
+#psi.hi <- apply(mod$BUGSoutput$sims.list$psi.QMD,2,function(x) quantile(x,prob=0.975,type=8))
+#dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
 
 X <- seq(min(QMD.x),max(QMD.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
@@ -203,8 +204,8 @@ pQMD <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   geom_line(size=1,linetype="solid") +
   geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
   geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
-  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=50) +
+#  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
+#  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=50) +
   ylab(NULL) + xlab(expression("QMD ("~cm^2~")")) +
   scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
   theme(axis.title.x=element_text(size=30)) +
@@ -260,7 +261,3 @@ save_plot("Plots.jpeg", p, ncol = 3, nrow = 3, dpi=600)
 
 # Cleanup #
 #rm(md,models,i,pr.y,pr.y.hat,clpd,t,eff.par,psi.p,p,psi,sum,m)
-
-##### Plot relationships for selected model ######
-mod <- loadObject("Mod_NoPers_EInfMInfSnagQMD")
-
