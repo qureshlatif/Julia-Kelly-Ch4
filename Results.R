@@ -137,41 +137,62 @@ p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
 
 save_plot("EarlInf_relation.jpeg", p, ncol = 1.5, nrow = 1.5, dpi=600) 
 
+#### Tabulate predicted occupancy probabilites in relation to other covariates ####
 
-##### Model summaries and selection table (obsolete) #####
+# Mid infestation #
+X <- seq(min(MidInf.x),max(MidInf.x),length.out=20)
+beta0 <- mod$BUGSoutput$sims.list$beta0
+beta1 <- mod$BUGSoutput$sims.list$beta1
+psifs <- mod$BUGSoutput$sims.list$psi.fs
+betaX <- mod$BUGSoutput$sims.list$beta.MidInf
 
-#models <- c("NoPers_EInfMInfSnagQMD","Pers_EInfMInfSnagQMD",
-            "PersDyn_EInfMInfSnagQMD","IndYrs_EInfMInfSnagQMD")
-#cols <- c("DIC","WAIC","pD")
-#out <- data.frame(matrix(NA,nrow=length(models),ncol=length(cols),
-                         dimnames=list(models,cols)),stringsAsFactors=F)
+Z <- (X - zscore.factors["MidInf","mean"])/zscore.factors["MidInf","sd"]
+psi <- psi.lo <- psi.hi <- numeric(length=length(X))
+for(i in 1:length(X)) {
+  y <- expit(beta0 + beta1*psifs + betaX*Z[i])
+  psi[i] <- median(y)
+  psi.lo[i] <- quantile(y,prob=0.025,type=8)
+  psi.hi[i] <- quantile(y,prob=0.975,type=8)
+}
+dat.prd <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+names(dat.prd)[1] <- "Mid infestation"
+write.csv(dat.prd,"Psi_pred_MidInfest.csv",row.names=F)
 
-#for(m in 1:length(models)) {
-#  md <- loadObject(paste("Mod_",models[m],sep=""))
-#  sum <- md$BUGSoutput$summary
-#  write.csv(sum[-which(substr(dimnames(sum)[[1]],1,3)=="psi"),],
-#            paste("Summary_",models[m],".csv",sep=""))
-#  out[m,"DIC"] <- round(md$BUGSoutput$DIC,digits=1)
-#  psi <- md$BUGSoutput$sims.list$psi
-#  p <- md$BUGSoutput$sims.list$p
-#  ## Computed log pointwise predictive density (Gelman eq 3)
-#  pr.y <- array(dim = dim(psi))
-#  for(i in 1:dim(pr.y)[1]) {
-#    psi.p <- psi[i,,]*p[i]
-#    for(t in 1:nyear) pr.y[i,,t] <- dbinom(x=Y[,t],prob=psi.p[,t],size=n.visits[t])
-#  }
-#  pr.y.hat <- apply(pr.y,c(2,3),mean,na.rm=T)
-#  clpd <- sum(log(pr.y.hat[is.finite(pr.y.hat)]))
-#  
-#  ## Estimated Effective Number of Parameters (Gelman eq 6)
-#  sample.variance <- apply(log(pr.y),c(2,3),var,na.rm=T)
-#  eff.par <- sum(sample.variance[is.finite(sample.variance)])
-#  
-#  out[m,"WAIC"] <- round(-2*(clpd - eff.par),digits=1)
-#  out[m,"pD"] <- round(eff.par,digits=1)
-#}
-#out <- out[order(out[,"WAIC"]),]
-#write.csv(out,"Model_selection.csv")
+# Snags #
+X <- seq(min(snag.x),max(snag.x),length.out=20)
+beta0 <- mod$BUGSoutput$sims.list$beta0
+beta1 <- mod$BUGSoutput$sims.list$beta1
+psifs <- mod$BUGSoutput$sims.list$psi.fs
+betaX <- mod$BUGSoutput$sims.list$beta.snag
 
-# Cleanup #
-#rm(md,models,i,pr.y,pr.y.hat,clpd,t,eff.par,psi.p,p,psi,sum,m)
+Z <- (X - zscore.factors["snag","mean"])/zscore.factors["snag","sd"]
+psi <- psi.lo <- psi.hi <- numeric(length=length(X))
+for(i in 1:length(X)) {
+  y <- expit(beta0 + beta1*psifs + betaX*Z[i])
+  psi[i] <- median(y)
+  psi.lo[i] <- quantile(y,prob=0.025,type=8)
+  psi.hi[i] <- quantile(y,prob=0.975,type=8)
+}
+dat.prd <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+names(dat.prd)[1] <- "Snags"
+write.csv(dat.prd,"Psi_pred_Snags.csv",row.names=F)
+
+# QMD #
+X <- seq(min(QMD.x),max(QMD.x),length.out=20)
+beta0 <- mod$BUGSoutput$sims.list$beta0
+beta1 <- mod$BUGSoutput$sims.list$beta1
+psifs <- mod$BUGSoutput$sims.list$psi.fs
+betaX <- mod$BUGSoutput$sims.list$beta.QMD
+
+Z <- (X - zscore.factors["QMD","mean"])/zscore.factors["QMD","sd"]
+psi <- psi.lo <- psi.hi <- numeric(length=length(X))
+for(i in 1:length(X)) {
+  y <- expit(beta0 + beta1*psifs + betaX*Z[i])
+  psi[i] <- median(y)
+  psi.lo[i] <- quantile(y,prob=0.025,type=8)
+  psi.hi[i] <- quantile(y,prob=0.975,type=8)
+}
+dat.prd <- data.frame(cbind(X,psi,psi.lo,psi.hi))
+names(dat.prd)[1] <- "QMD"
+write.csv(dat.prd,"Psi_pred_QMD.csv",row.names=F)
+
