@@ -89,7 +89,7 @@ p <- ggplot(data = dat,aes(x=X,y=med)) +
                                                      expression(beta["Einf"]),
                                                      expression(beta[1]),
                                                      expression(beta[0]))) +
-  ylab("Logit probability") + xlab("              Covariate effects                             Intercept terms") +
+  ylab("Parameter Estimate") + xlab("              Covariate effects                             Intercept terms") +
   theme(axis.title.y=element_text(size=30)) +
   theme(axis.title.x=element_text(size=30)) +
   theme(axis.text.x=element_text(size=25)) +
