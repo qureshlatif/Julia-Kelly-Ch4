@@ -1,5 +1,5 @@
 #setwd("C:/Users/qlatif/Desktop/JuliaBeetle_Chap4") # Change to environment
-setwd("F:/research stuff/FS_PostDoc/outside_consult/JuliaBeetle_Chap4") # Change to environment
+setwd("F:/research stuff/FS_PostDoc/consult_&_collaborate/JuliaH_dissert/Chap4") # Change to environment
 
 ## Load and clean data ##
 Detection.data <- read.csv("BirdsAll72Plots.csv",header=T,stringsAsFactors=F)
@@ -159,14 +159,27 @@ Tree.data$dbh[which(Tree.data$plot=="4a6"&is.na(Tree.data$dbh))] <- mn
 rm(mn)
 
   # Compile tree summary values into Plot-level table #
-Plot.data$QMD_2014 <- Plot.data$QMD_2015 <- Plot.data$QMD_2016 <-
+Plot.data$EarlInf_gt38_2016 <- Plot.data$EarlInf_gt38_2015 <- Plot.data$EarlInf_gt38_2014 <-
+  Plot.data$EarlInf_23to38_2016 <- Plot.data$EarlInf_23to38_2015 <- Plot.data$EarlInf_23to38_2014 <-
+  Plot.data$EarlInf_lt23_2016 <- Plot.data$EarlInf_lt23_2015 <- Plot.data$EarlInf_lt23_2014 <-
+  Plot.data$QMD_pien_2016 <- Plot.data$QMD_pien_2015 <- Plot.data$QMD_pien_2014 <-
+  Plot.data$QMD_2016 <- Plot.data$QMD_2015 <- Plot.data$QMD_2014 <-
   Plot.data$EarlInf_2016 <- Plot.data$EarlInf_2015 <- Plot.data$EarlInf_2014 <- 
-  Plot.data$MidInf_2016 <- Plot.data$MidInf_2015 <- Plot.data$MidInf_2014 <- 0
+  Plot.data$MidInf_2016 <- Plot.data$MidInf_2015 <- Plot.data$MidInf_2014 <-
   Plot.data$snag_2016 <- Plot.data$snag_2015 <- Plot.data$snag_2014 <- 0
 for(i in 1:nrow(Plot.data)) {
   obs2014 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2014&Tree.data$core_outsideplot!="y"),]
   obs2015 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2015&Tree.data$core_outsideplot!="y"),]
   obs2016 <- Tree.data[which(Tree.data$plot==Plot.data$plot[i]&Tree.data$year==2016&Tree.data$core_outsideplot!="y"),]
+  Plot.data$EarlInf_gt38_2014[i] <- sum(obs2014$status=="early Inf" & obs2014$dbh > 38)
+  Plot.data$EarlInf_gt38_2015[i] <- sum(obs2015$status=="early Inf" & obs2015$dbh > 38)
+  Plot.data$EarlInf_gt38_2016[i] <- sum(obs2016$status=="early Inf" & obs2016$dbh > 38)
+  Plot.data$EarlInf_23to38_2014[i] <- sum(obs2014$status=="early Inf" & obs2014$dbh >= 23 & obs2014$dbh < 38)
+  Plot.data$EarlInf_23to38_2015[i] <- sum(obs2015$status=="early Inf" & obs2015$dbh >= 23 & obs2015$dbh < 38)
+  Plot.data$EarlInf_23to38_2016[i] <- sum(obs2016$status=="early Inf" & obs2016$dbh >= 23 & obs2016$dbh < 38)
+  Plot.data$EarlInf_lt23_2014[i] <- sum(obs2014$status=="early Inf" & obs2014$dbh < 23)
+  Plot.data$EarlInf_lt23_2015[i] <- sum(obs2015$status=="early Inf" & obs2015$dbh < 23)
+  Plot.data$EarlInf_lt23_2016[i] <- sum(obs2016$status=="early Inf" & obs2016$dbh < 23)
   Plot.data$EarlInf_2014[i] <- sum(obs2014$status=="early Inf")
   Plot.data$EarlInf_2015[i] <- sum(obs2015$status=="early Inf")
   Plot.data$EarlInf_2016[i] <- sum(obs2016$status=="early Inf")
@@ -176,6 +189,12 @@ for(i in 1:nrow(Plot.data)) {
   Plot.data$snag_2014[i] <- sum(obs2014$status=="snag")
   Plot.data$snag_2015[i] <- sum(obs2015$status=="snag")
   Plot.data$snag_2016[i] <- sum(obs2016$status=="snag")
+  Plot.data$QMD_pien_2014[i] <- mean(obs2014$dbh[which(obs2014$type!="stump" & obs2014$status!="mid Inf" &
+                                                    obs2014$status!="snag" & obs2014$species == "pien")]^2,na.rm=T)
+  Plot.data$QMD_pien_2015[i] <- mean(obs2015$dbh[which(obs2015$type!="stump"&obs2015$status!="mid Inf"&
+                                                    obs2015$status!="snag" & obs2015$species == "pien")]^2,na.rm=T)
+  Plot.data$QMD_pien_2016[i] <- mean(obs2016$dbh[which(obs2016$type!="stump"&obs2016$status!="mid Inf"&
+                                                    obs2016$status!="snag" & obs2016$species == "pien")]^2,na.rm=T)
   Plot.data$QMD_2014[i] <- mean(obs2014$dbh[which(obs2014$type!="stump"&obs2014$status!="mid Inf"&
                                                     obs2014$status!="snag")]^2,na.rm=T)
   Plot.data$QMD_2015[i] <- mean(obs2015$dbh[which(obs2015$type!="stump"&obs2015$status!="mid Inf"&
