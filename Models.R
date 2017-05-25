@@ -1,5 +1,5 @@
 library(R2jags)
-setwd("F:/research stuff/FS_PostDoc/outside_consult/JuliaBeetle_Chap4")  # Set workspace to location with 'Data_compiled' workspace.
+setwd("F:/research stuff/FS_PostDoc/consult_&_collaborate/JuliaH_dissert/Chap4")  # Set workspace to location with 'Data_compiled' workspace.
 #setwd("~/Documents/Rdata/JuliaBeetle_Chap4")
 load("Data_compiled.RData")
 
@@ -8,8 +8,8 @@ rows <- c("QMD","EarlInf","MidInf","snag")
 cols <- c("mean","sd")
 zscore.factors <- matrix(NA,nrow=length(rows),ncol=length(cols),dimnames=list(rows,cols))
 rm(rows,cols)
-zscore.factors["QMD",] <- c(mean(as.matrix(Plot.data[,c("QMD_2014","QMD_2014","QMD_2015","QMD_2016")])),
-                                   sd(as.matrix(Plot.data[,c("QMD_2014","QMD_2014","QMD_2015","QMD_2016")])))
+zscore.factors["QMD",] <- c(mean(as.matrix(Plot.data[,c("QMD_pien_2014","QMD_pien_2014","QMD_pien_2015","QMD_pien_2016")])),
+                                   sd(as.matrix(Plot.data[,c("QMD_pien_2014","QMD_pien_2014","QMD_pien_2015","QMD_pien_2016")])))
 zscore.factors["snag",] <- c(mean(as.matrix(Plot.data[,c("snag_2014","snag_2014","snag_2015","snag_2016")])),
                                    sd(as.matrix(Plot.data[,c("snag_2014","snag_2014","snag_2015","snag_2016")])))
 zscore.factors["EarlInf",] <- c(mean(as.matrix(Plot.data[,c("EarlInf_2014","EarlInf_2014","EarlInf_2015","EarlInf_2016")])),
@@ -26,7 +26,7 @@ MidInf.z <- (MidInf.x - zscore.factors["MidInf","mean"])/zscore.factors["MidInf"
 snag.x <- as.matrix(cbind(Plot.data[,"snag_2014"],Plot.data[,c("snag_2014","snag_2015","snag_2016")]))
 snag.z <- (snag.x - zscore.factors["snag","mean"])/zscore.factors["snag","sd"]
 
-QMD.x <- as.matrix(cbind(Plot.data[,"QMD_2014"],Plot.data[,c("QMD_2014","QMD_2015","QMD_2016")]))
+QMD.x <- as.matrix(cbind(Plot.data[,"QMD_pien_2014"],Plot.data[,c("QMD_pien_2014","QMD_pien_2015","QMD_pien_2016")]))
 QMD.z <- (QMD.x - zscore.factors["QMD","mean"])/zscore.factors["QMD","sd"]
 
 dimnames(EarlInf.x)[[2]] <- dimnames(MidInf.x)[[2]] <- dimnames(snag.x)[[2]] <- dimnames(QMD.x)[[2]] <-
@@ -70,7 +70,7 @@ snag.low <- (snag.z<(-0.65))*1
 snag.mod <- (snag.z>(-0.65)&snag.z<0.1)
 snag.high <- (snag.z>0.1)
 
-  # Bins for QMD (mean): 32-520 (305), 520-810 (633), 810-2871 (1136)
+  # Bins for QMD (mean): 16-687 (374), 687-1090 (928), 1090-3717 (1589)
 QMD.low <- (QMD.z<(-0.39))
 QMD.mod <- (QMD.z>(-0.39)&QMD.z<0.277)
 QMD.high <- (QMD.z>0.277)
@@ -105,8 +105,8 @@ data <- list("Y","nplot","nyear","n.visits","EarlInf.z","MidInf.z","snag.z","QMD
 inits <- function(){list(Z=Z.init)}
 
 # Assemble the parameters vector for JAGS (What we want to track).
-parameters <- c("p","beta0","beta1","beta.EarlInf","beta.MidInf","beta.snag","beta.QMD","test","psi.EI","psi.MI",
-                "psi.snag","psi.QMD","psi.fs")
+parameters <- c("p","beta0","beta1","beta.EarlInf","beta.MidInf","beta.snag","beta.QMD",
+                "test","psi.EI","psi.MI","psi.snag","psi.QMD","psi.fs")
 
 sink("model.txt")
 cat("
@@ -125,7 +125,7 @@ beta.QMD ~ dnorm(0,0.01)T(-30,30)
 beta.EarlInf ~ dnorm(0,0.01)T(-30,30)
 beta.MidInf ~ dnorm(0,0.01)T(-30,30)
 beta.snag ~ dnorm(0,0.01)T(-30,30)
-  
+
 #Model
 psi0 ~ dunif(0,1)
 for(j in 1:nplot){  # Loop for year 1 - uses z0 to calculate persistence offset
