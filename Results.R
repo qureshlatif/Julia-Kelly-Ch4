@@ -46,10 +46,6 @@ Y <- # Collapse further to represent the number of visits when species detected 
   apply(Y,c(1,2),function(x) sum(x,na.rm=T))
 Y[which(is.element(substr(plot,1,2),c("1a","2a","1b","2b"))),1] <- NA # Sites 1 and 2 not surveyed in 2013.
 
-# Remove observations for pointxyear occassions following clear-cut (optional) #
-#Y[which(is.element(substr(plot,1,2),c("1a7","1a8","1a9"))),c(3,4)] <- NA
-#Y[which(plot=="2a5"),4] <- NA
-
 nplot <- length(plot)
 nyear <- length(year)
 
@@ -69,7 +65,7 @@ library(ggplot2)
 library(cowplot)
 expit <- function(x) exp(x)/(1+exp(x))
 
-## Plot covariate parameter estimates (Reviewer asked for table, so dropping this plot.) ##
+## Tabulate covariate parameter estimates ##
 
 rows <- c("beta0","beta0+beta1","EarlInf","MidInf","Snag","QMD")
 cols <- c("med","lo95","lo90","hi90","hi95")
@@ -93,42 +89,8 @@ dat$hi90 <- apply(mod$BUGSoutput$sims.array[,,c("beta0","beta1","beta.EarlInf","
 dat <- round(dat, digits = 2)
 write.csv(dat, "Model_summary_MS.csv", row.names = T)
 rm(dat, b0b1)
-#p <- ggplot(data = dat,aes(x=X,y=med)) +
-#  geom_errorbar(aes(ymin=lo,ymax=hi),size=1,width=0) +
-#  geom_point(size=2.5) + 
-#  geom_hline(yintercept=0,linetype="dotted") +
-#  coord_flip() +
-#  scale_x_continuous(breaks=c(1:4,5.5,6.5),labels=c(expression(beta["QMD"]),
-#                                                     expression(beta["sng"]),
-#                                                     expression(beta["Minf"]),
-#                                                     expression(beta["Einf"]),
-#                                                     expression(beta[1]),
-#                                                     expression(beta[0]))) +
-#  ylab("Parameter estimate") + xlab("              Covariate effects                             Intercept terms") +
-#  theme(axis.title.y=element_text(size=30)) +
-#  theme(axis.title.x=element_text(size=30)) +
-#  theme(axis.text.x=element_text(size=25)) +
-#  theme(axis.text.y=element_text(size=25))
-
-#save_plot("Occupancy_parameters.jpeg", p, ncol = 3, nrow = 3, dpi=600) 
 
 # Early infestation #
-  # finite-sample estimates #
-X <- c(0,3.08,21.08) # mean values for finite-sample bins
-psi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,median)
-psi.lo <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.025,type=8))
-psi.hi <- apply(mod$BUGSoutput$sims.list$psi.EI,2,function(x) quantile(x,prob=0.975,type=8))
-dat.est <- data.frame(cbind(X,psi,psi.lo,psi.hi))
-
-  # Observed values (covariate value for point X year detections and non-detections) #
-#det <- apply(Y,c(1,2),function(x) sum(x>0,na.rm=T)*1)
-#det[is.na(Y)] <- NA
-#detections <- data.frame(as.numeric(EarlInf.x[which(det==1)]))
-#nondetects <- data.frame(as.numeric(EarlInf.x[which(det==0)]))
-#names(detections) <- names(nondetects) <- "x"
-#detections <- detections + runif(nrow(detections),-0.3,0.3)
-#nondetects <- nondetects + runif(nrow(nondetects),-0.3,0.3)
-
   # predicted probabilities #
 X <- seq(min(EarlInf.x),max(EarlInf.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
@@ -145,38 +107,6 @@ for(i in 1:length(X)) {
   psi.hi[i] <- quantile(y,prob=0.975,type=8)
 }
 dat.prd <- data.frame(cbind(X,psi,psi.lo,psi.hi))
-
-# With raw data instead of finite sample estimates #
-#p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
-#  geom_line(size=1,linetype="solid") +
-#  geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
-#  geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-#  geom_point(data=detections,aes(x=x,y=1.01),size=3,alpha=0.5) + 
-#  geom_point(data=nondetects,aes(x=x,y=0),size=3,alpha=0.5) + 
-#  ylab("Occupancy probability") + xlab("Number Early Infested Trees") +
-#  scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
-#  theme(axis.title.x=element_text(size=30)) +
-#  theme(axis.title.y=element_text(size=30)) +
-#  theme(axis.text.x=element_text(size=20)) +
-#  theme(axis.text.y=element_text(size=25)) +
-#  guides(shape=FALSE,linetype=FALSE)
-
-# With finite-sample estimates #
-p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
-  geom_line(size=1,linetype="solid") +
-  geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
-  geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.est,aes(x=X,y=psi),size=5) + 
-  geom_errorbar(data=dat.est,aes(x=X,ymin=psi.lo,ymax=psi.hi),size=1,width=1) +
-  ylab("Point occupancy") + xlab("Number Early Infested Trees") +
-  scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
-  theme(axis.title.x=element_text(size=30)) +
-  theme(axis.title.y=element_text(size=30)) +
-  theme(axis.text.x=element_text(size=20)) +
-  theme(axis.text.y=element_text(size=25)) +
-  guides(shape=FALSE,linetype=FALSE)
-
-save_plot("EarlInf_relation.jpeg", p, ncol = 3, nrow = 3, dpi=600) 
 
 ## With finite-sample estimates for sites and years ##
 # Compile site names for siteXyear occupancy estimates (requested by reviewer) #
@@ -210,13 +140,13 @@ dat.SXY <- dat.SXY[-which(dat.SXY$Sites == "SG" &
                             dat.SXY$Years == "2013"), ] # Remove value for Slumgullion in 2013 when not surveyed.
 dat.prd$X <- dat.prd$X * 25 # Convert to per ha
 
-# Tabulate site X year early infestation values #
-require(gridExtra)
-tab.EInf <- cbind(c("-", round(dat.SXY$X[1:3], digits = 1)),
-                  round(dat.SXY$X[4:7], digits = 1),
-                  round(dat.SXY$X[8:11], digits = 1),
-                  round(dat.SXY$X[12:15], digits = 1))
-dimnames(tab.EInf) <- list(c("SG", "TV", "WT", "SM"), c(2013, 2014, 2015, 2016))
+# Tabulate site X year early infestation values (decided not to include) #
+#require(gridExtra)
+#tab.EInf <- cbind(c("-", round(dat.SXY$X[1:3], digits = 1)),
+#                  round(dat.SXY$X[4:7], digits = 1),
+#                  round(dat.SXY$X[8:11], digits = 1),
+#                  round(dat.SXY$X[12:15], digits = 1))
+#dimnames(tab.EInf) <- list(c("SG", "TV", "WT", "SM"), c(2013, 2014, 2015, 2016))
 
 theme_set(theme_cowplot())
 p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
@@ -235,15 +165,13 @@ p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   guides(linetype=FALSE) +
   theme(legend.title = element_text(size = 25),
         legend.text = element_text(size = 20),
-        legend.key.height=unit(1, "cm")) +
-  annotation_custom(tableGrob(tab.EInf, theme = ttheme_minimal()), xmin=600, xmax=1200, ymin=0, ymax=0.5) +
-  annotate("text", x = 900, y = 0.4, label = "Early Infested trees per ha", size = 5)
+        legend.key.height=unit(1, "cm"))
 
 #save_plot("EarlInf_relation_SXY.jpeg", p, ncol = 3, nrow = 3, dpi=600) 
 save_plot("EarlInf_relation_SXY.tiff", p, ncol = 2, nrow = 2, dpi=600) 
-save_plot("EarlInf_relation_SXY.eps", p, ncol = 3, nrow = 3, dpi=600, device = "eps") 
+#save_plot("EarlInf_relation_SXY.eps", p, ncol = 3, nrow = 3, dpi=600, device = "eps") 
 
-# Predicted probabilities with QMD (to be reported in Results text) #
+# Predicted probabilities with QMD (reported in Results text) #
   # Remove observations for pointxyear occassions following clear-cut #
 QMD.x[which(substr(plot, 1, 3) %in% c("1a7","1a8","1a9")), c(3, 4)] <- NA
 QMD.x[which(plot=="2a5"),4] <- NA
