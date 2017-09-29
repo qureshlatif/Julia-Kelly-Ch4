@@ -55,7 +55,7 @@ mod <- loadObject("Mod_Pers_EInfMInfSnagQMD")
 #mod <- loadObject("Mod_Pers_EInfMInfSnagQMD_PriorTrunc")
 write.csv(mod$BUGSoutput$summary[
   -which(substr(dimnames(mod$BUGSoutput$summary)[[1]], 1, 1) == "Z"), ],
-          "Model_summary.csv") # Export summary of model parameters and output.
+  "Model_summary.csv") # Export summary of model parameters and output.
 
 #mod <- loadObject("Mod_Pers_EInfMInfSnagQMD_noClrCut")
 #write.csv(mod$BUGSoutput$summary,"Model_summary_noClrCut.csv") # Export summary of model parameters and output.
@@ -72,13 +72,13 @@ cols <- c("med","lo95","lo90","hi90","hi95")
 dat <- data.frame(matrix(0,nrow=length(rows),ncol=length(cols),dimnames=list(rows,cols)))
 
 dat$med <- apply(mod$BUGSoutput$sims.array[,,c("beta0","beta1","beta.EarlInf","beta.MidInf",
-                                                   "beta.snag","beta.QMD")], 3, median)
+                                               "beta.snag","beta.QMD")], 3, median)
 dat$lo95 <- apply(mod$BUGSoutput$sims.array[,,c("beta0","beta1","beta.EarlInf","beta.MidInf",
-                                                   "beta.snag","beta.QMD")],3,function(x)
-                                                     quantile(x, prob=0.025, type = 8))
+                                                "beta.snag","beta.QMD")],3,function(x)
+                                                  quantile(x, prob=0.025, type = 8))
 dat$hi95 <- apply(mod$BUGSoutput$sims.array[,,c("beta0","beta1","beta.EarlInf","beta.MidInf",
-                                                   "beta.snag","beta.QMD")],3,function(x)
-                                                     quantile(x, prob=0.975, type = 8))
+                                                "beta.snag","beta.QMD")],3,function(x)
+                                                  quantile(x, prob=0.975, type = 8))
 dat$lo90 <- apply(mod$BUGSoutput$sims.array[,,c("beta0","beta1","beta.EarlInf","beta.MidInf",
                                                 "beta.snag","beta.QMD")],3,function(x)
                                                   quantile(x, prob=0.05, type = 8))
@@ -91,7 +91,7 @@ write.csv(dat, "Model_summary_MS.csv", row.names = T)
 rm(dat, b0b1)
 
 # Early infestation #
-  # predicted probabilities #
+# predicted probabilities #
 X <- seq(min(EarlInf.x),max(EarlInf.x),length.out=20)
 beta0 <- mod$BUGSoutput$sims.list$beta0
 beta1 <- mod$BUGSoutput$sims.list$beta1
@@ -112,10 +112,10 @@ dat.prd <- data.frame(cbind(X,psi,psi.lo,psi.hi))
 # Compile site names for siteXyear occupancy estimates (requested by reviewer) #
 require(stringr)
 sites <- str_sub(plot, 1, -3)
-sites <- sites %>% replace(which(sites == "11"), "TV") %>%
-  replace(which(sites %in%c("1", "2")), "SG") %>%
-  replace(which(sites == "4"), "WT") %>%
-  replace(which(sites == "5"), "SM")
+sites <- sites %>% replace(which(sites == "11"), "Tuckerville") %>%
+  replace(which(sites %in%c("1", "2")), "Slumgullion") %>%
+  replace(which(sites == "4"), "Winter Trail") %>%
+  replace(which(sites == "5"), "Stoner Mesa")
 
 # site X year estimates #
 Z.est <- mod$BUGSoutput$sims.list$Z
@@ -136,7 +136,7 @@ for(s in 1:nrow(dat.SXY)) {
   dat.SXY[s, "psi.hi"] <- quantile(psifs, prob = 0.975, type = 8)
 }
 dat.SXY$X <- dat.SXY$X * 25 # Convert to per ha
-dat.SXY <- dat.SXY[-which(dat.SXY$Sites == "SG" &
+dat.SXY <- dat.SXY[-which(dat.SXY$Sites == "Slumgullion" &
                             dat.SXY$Years == "2013"), ] # Remove value for Slumgullion in 2013 when not surveyed.
 dat.prd$X <- dat.prd$X * 25 # Convert to per ha
 
@@ -153,26 +153,31 @@ p <- ggplot(data = dat.prd,aes(x=X,y=psi)) +
   geom_line(size=1,linetype="solid") +
   geom_line(aes(y=psi.lo),size=1,linetype="dashed") +
   geom_line(aes(y=psi.hi),size=1,linetype="dashed") +
-  geom_point(data=dat.SXY, aes(x=X, y=psi, shape = Sites), size=3) + 
-  geom_errorbar(data=dat.SXY, aes(x=X, ymin=psi.lo, ymax=psi.hi), size=1, width = 0) +
-  ylab("Point occupancy") + xlab("Early Infested Trees (stems/ha)") +
+  geom_point(data=dat.SXY, aes(x=X, y=psi, shape = Sites, colour = Sites), size=5) + 
+  geom_errorbar(data=dat.SXY, aes(x=X, ymin=psi.lo, ymax=psi.hi, colour = Sites), size=1, width = 20) +
+  ylab("Point occupancy") + xlab("Early-infested trees (stems/ha)") +
   scale_y_continuous(lim=c(0,1.05),breaks=c(0,0.25,0.5,0.75,1)) +
-  scale_shape_manual(values = c(15, 16, 17, 18)) +
-  theme(axis.title.x=element_text(size=30)) +
-  theme(axis.title.y=element_text(size=30)) +
+  scale_shape_manual(limits = c("Winter Trail", "Stoner Mesa", "Slumgullion", "Tuckerville"),
+                     values = c(15, 16, 17, 18)) +
+  scale_colour_manual(limits = c("Winter Trail", "Stoner Mesa", "Slumgullion", "Tuckerville"),
+                      values = c("Winter Trail" = "#F0E442", "Stoner Mesa" = "#D55E00",
+                                 "Slumgullion" = "#009E73", "Tuckerville" = "#56B4E9")) +
+  theme(axis.title.x=element_text(size=25)) +
+  theme(axis.title.y=element_text(size=25)) +
   theme(axis.text.x=element_text(size=20)) +
-  theme(axis.text.y=element_text(size=25)) +
+  theme(axis.text.y=element_text(size=20)) +
   guides(linetype=FALSE) +
+  labs(shape = "Study Sites", colour = "Study Sites") +
   theme(legend.title = element_text(size = 25),
         legend.text = element_text(size = 20),
         legend.key.height=unit(1, "cm"))
 
 #save_plot("EarlInf_relation_SXY.jpeg", p, ncol = 3, nrow = 3, dpi=600) 
-save_plot("EarlInf_relation_SXY.tiff", p, ncol = 2, nrow = 2, dpi=600) 
+save_plot("EarlInf_relation_SXY.tiff", p, ncol = 2, nrow = 2, dpi=400) 
 #save_plot("EarlInf_relation_SXY.eps", p, ncol = 3, nrow = 3, dpi=600, device = "eps") 
 
 # Predicted probabilities with QMD (reported in Results text) #
-  # Remove observations for pointxyear occassions following clear-cut #
+# Remove observations for pointxyear occassions following clear-cut #
 QMD.x[which(substr(plot, 1, 3) %in% c("1a7","1a8","1a9")), c(3, 4)] <- NA
 QMD.x[which(plot=="2a5"),4] <- NA
 
